@@ -3,7 +3,9 @@
 
 from PIL import Image
 from PIL.ExifTags import TAGS
+from pymediainfo import MediaInfo
 import os
+import json
 
 
 NAME_PATH = "C:/Users/051LisitsynIV/PycharmProjects/alternativa/IMG_2693.JPG"
@@ -48,11 +50,22 @@ def parsing_direction(file): # определяем направления па�
 
             if coordinate != None:
                 pass
+        else:
+            media_info = MediaInfo.parse(file_name, output="JSON")
+            js = json.loads(media_info)
+            data = js['media']['track'][0]['Encoded_Date'] # получаем ответ "UTC xxxx-xx-xx xx:xx:xx"
+            no_uts = data.find(" ")
+            data = data[no_uts + 1:] #              преобразовываем "UTC xxxx-xx-xx xx:xx:xx" в "xxxx-xx-xx xx:xx:xx"
+            new_name = new_data_name(data)
+            print(new_name)
 
 
 def new_data_name(date): #
     new_name = date.split()
-    new_file_name_data = str(new_name[0]).replace(":", "_") + "_" + str(new_name[1])
+    if "-" in new_name[0]:
+        new_file_name_data = str(new_name[0]).replace("-", "_") + "_" + str(new_name[1])
+    else:
+        new_file_name_data = str(new_name[0]).replace(":", "_") + "_" + str(new_name[1])
     return new_file_name_data
 
 
