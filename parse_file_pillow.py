@@ -4,12 +4,15 @@
 from PIL import Image
 from PIL.ExifTags import TAGS
 from pymediainfo import MediaInfo
+from geopy import GoogleV3
 import os
 import json
 
 
-NAME_PATH = "C:/Users/051LisitsynIV/PycharmProjects/alternativa/IMG_2693.JPG"
+NAME_PATH = "C:/Users/051LisitsynIV/PycharmProjects/alternativa/IMG_2558.JPEG"
 #NAME_PATH = "C:/Users/051LisitsynIV/PycharmProjects/alternativa/enimal.jpg"
+APY_KEY = ""
+
 
 def parce_file(name):
     image = Image.open(name)
@@ -37,6 +40,7 @@ def read_dir(dir): # составляем список имен директор
 
 def parsing_direction(file): # определяем направления парсинга в зависимости от расширения
     dir = file[0]
+    new_name = ""
     for name in file[1:]:
         file_name = os.path.join(dir, name)
         if name.split('.')[1].lower() != 'mp4' and name.split('.')[1].lower() != 'mov':
@@ -49,7 +53,8 @@ def parsing_direction(file): # определяем направления па�
                 print(new_name)
 
             if coordinate != None:
-                pass
+                new_name = new_name + "_" + get_goole_coordinate(coordinate, APY_KEY)
+                print(new_name)
         else:
             media_info = MediaInfo.parse(file_name, output="JSON")
             js = json.loads(media_info)
@@ -59,6 +64,19 @@ def parsing_direction(file): # определяем направления па�
             new_name = new_data_name(data)
             print(new_name)
 
+
+def get_goole_coordinate(coordinate, APY_KEY): # получаем наименование точки на карте по координатам
+    latitude = coordinate[0]
+    longitude = coordinate[1]
+    point_name = GoogleV3(api_key=APY_KEY).reverse((latitude, longitude))
+    point_name = str(point_name)
+    name_pars = point_name.split(",")
+    try:
+        name = name_pars[0].replace(" ","_") + "_" + name_pars[1].replace(" ","_") + "_" + name_pars[1].replace(" ","_")
+    except:
+        # не кривые координаты
+        name = ""
+    return name
 
 def new_data_name(date): #
     new_name = date.split()
